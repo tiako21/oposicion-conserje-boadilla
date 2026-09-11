@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oposición Conserje Boadilla</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --surface:#ffffff; --surface-2:#f0eee9; --border:#e2ddd3;
+    --text:#2b2620; --text-dim:#6b6357; --accent:#8a5a3b; --accent-2:#c07a4a;
+    --good:#3f7a4e; --good-bg:#e8f3ea; --bad:#b3452f; --bad-bg:#fbeae6;
+    --shadow: 0 1px 2px rgba(30,20,10,0.06), 0 4px 14px rgba(30,20,10,0.06);
+    --radius: 14px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1b1712; --surface:#252019; --surface-2:#2e2820; --border:#3a3327;
+      --text:#efe9df; --text-dim:#b2a894; --accent:#e0a370; --accent-2:#d98f56;
+      --good:#7bc490; --good-bg:#1f3226; --bad:#e2917c; --bad-bg:#3a231d;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1b1712; --surface:#252019; --surface-2:#2e2820; --border:#3a3327;
+    --text:#efe9df; --text-dim:#b2a894; --accent:#e0a370; --accent-2:#d98f56;
+    --good:#7bc490; --good-bg:#1f3226; --bad:#e2917c; --bad-bg:#3a231d;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{background:var(--bg); color:var(--text); font-family: "Iowan Old Style","Georgia",serif;}
+  #app{max-width:880px; margin:0 auto; padding:20px 16px 64px;}
+  h1,h2,h3,h4{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight:700; line-height:1.25;}
+  p,li{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;}
+  .top{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:4px;}
+  .top h1{font-size:1.4rem; margin:0;}
+  .subtitle{color:var(--text-dim); font-size:0.85rem; margin:0 0 18px;}
+  nav.tabs{display:flex; gap:6px; background:var(--surface-2); padding:4px; border-radius:999px; margin-bottom:22px; flex-wrap:wrap;}
+  nav.tabs button{flex:1; min-width:100px; border:none; background:transparent; color:var(--text-dim); font:600 0.85rem/1 -apple-system,sans-serif; padding:10px 12px; border-radius:999px; cursor:pointer; transition:.15s;}
+  nav.tabs button.active{background:var(--surface); color:var(--accent); box-shadow:var(--shadow);}
+  nav.tabs button:hover:not(.active){color:var(--text);}
+  .view{display:none;}
+  .view.active{display:block;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow);}
+  .tema-card{cursor:pointer;}
+  .tema-head{display:flex; align-items:center; gap:12px;}
+  .tema-num{flex:0 0 auto; width:34px; height:34px; border-radius:10px; background:var(--surface-2); color:var(--accent); font-weight:800; display:flex; align-items:center; justify-content:center; font-family:-apple-system,sans-serif;}
+  .tema-head strong{font-size:0.98rem;}
+  .tema-progress{margin-left:auto; font-size:0.75rem; color:var(--text-dim); font-family:-apple-system,sans-serif; white-space:nowrap;}
+  .chevron{transition: transform .2s; color:var(--text-dim); flex:0 0 auto;}
+  .tema-card.open .chevron{transform:rotate(90deg);}
+  .tema-body{display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--border);}
+  .tema-card.open .tema-body{display:block;}
+  .toggle-row{display:flex; gap:8px; margin-bottom:14px;}
+  .toggle-row button{border:1px solid var(--border); background:var(--surface-2); color:var(--text-dim); font:600 0.78rem/1 -apple-system,sans-serif; padding:7px 14px; border-radius:8px; cursor:pointer;}
+  .toggle-row button.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .content h4{font-size:0.95rem; color:var(--accent); margin:16px 0 8px;}
+  .content h4:first-child{margin-top:0;}
+  .content p{font-size:0.92rem; line-height:1.65; margin:0 0 12px; color:var(--text);}
+  .content ul{margin:0 0 14px; padding-left:20px;}
+  .content li{font-size:0.92rem; line-height:1.6; margin-bottom:8px; color:var(--text);}
+  .content strong{color:var(--accent);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; background:var(--accent); color:#fff; font:700 0.85rem/1 -apple-system,sans-serif; padding:11px 20px; border-radius:10px; cursor:pointer; transition:.15s;}
+  .btn:hover{background:var(--accent-2);}
+  .btn.secondary{background:var(--surface-2); color:var(--text);}
+  .btn.secondary:hover{background:var(--border);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  select{font:600 0.85rem/1 -apple-system,sans-serif; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+  .quiz-setup{text-align:center; padding:30px 16px;}
+  .quiz-setup h2{margin:0 0 6px;}
+  .mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; text-align:left;}
+  @media (max-width:520px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{border:2px solid var(--border); border-radius:var(--radius); padding:16px; cursor:pointer; background:var(--surface);}
+  .mode-card.selected{border-color:var(--accent); background:var(--good-bg);}
+  .mode-card h3{margin:0 0 6px; font-size:0.95rem;}
+  .mode-card p{margin:0; font-size:0.8rem; color:var(--text-dim); font-family:-apple-system,sans-serif;}
+  .mode-card select{margin-top:10px; width:100%;}
+  .progress-bar{height:6px; background:var(--surface-2); border-radius:3px; overflow:hidden; margin-bottom:20px;}
+  .progress-bar>div{height:100%; background:var(--accent); transition:width .25s;}
+  .q-meta{display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); font-family:-apple-system,sans-serif; margin-bottom:10px;}
+  .q-text{font-size:1.05rem; font-weight:700; font-family:-apple-system,sans-serif; margin:0 0 18px; line-height:1.4;}
+  .option{display:flex; align-items:flex-start; gap:10px; border:1px solid var(--border); border-radius:10px; padding:13px 14px; margin-bottom:10px; cursor:pointer; font-family:-apple-system,sans-serif; font-size:0.9rem; transition:.12s;}
+  .option:hover{border-color:var(--accent-2);}
+  .option.selected{border-color:var(--accent); background:var(--surface-2);}
+  .option.correct{border-color:var(--good); background:var(--good-bg);}
+  .option.incorrect{border-color:var(--bad); background:var(--bad-bg);}
+  .option .letter{flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem; color:var(--text-dim);}
+  .option.selected .letter{background:var(--accent); color:#fff;}
+  .option.correct .letter{background:var(--good); color:#fff;}
+  .option.incorrect .letter{background:var(--bad); color:#fff;}
+  .exp-box{margin-top:10px; padding:12px 14px; border-radius:10px; background:var(--surface-2); font-size:0.85rem; font-family:-apple-system,sans-serif; color:var(--text-dim); display:none;}
+  .exp-box.show{display:block;}
+  .result-score{text-align:center; padding:20px 0 10px;}
+  .result-score .big{font-size:3rem; font-weight:800; font-family:-apple-system,sans-serif; color:var(--accent);}
+  .result-score .lbl{color:var(--text-dim); font-family:-apple-system,sans-serif; font-size:0.85rem;}
+  .review-item{border-bottom:1px solid var(--border); padding:14px 0;}
+  .review-item:last-child{border-bottom:none;}
+  .review-item .tag{display:inline-block; font-size:0.68rem; font-family:-apple-system,sans-serif; font-weight:700; padding:2px 8px; border-radius:6px; margin-bottom:6px;}
+  .review-item.ok .tag{background:var(--good-bg); color:var(--good);}
+  .review-item.bad .tag{background:var(--bad-bg); color:var(--bad);}
+  table.hist{width:100%; border-collapse:collapse; font-family:-apple-system,sans-serif; font-size:0.85rem;}
+  table.hist th{text-align:left; color:var(--text-dim); font-size:0.72rem; text-transform:uppercase; letter-spacing:.03em; padding:6px 8px; border-bottom:1px solid var(--border);}
+  table.hist td{padding:9px 8px; border-bottom:1px solid var(--border);}
+  table.hist tr:last-child td{border-bottom:none;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:999px; font-size:0.72rem; font-weight:700;}
+  .pill.good{background:var(--good-bg); color:var(--good);}
+  .pill.mid{background:#fbf1d8; color:#8a6a1f;}
+  .pill.bad{background:var(--bad-bg); color:var(--bad);}
+  .empty-msg{text-align:center; color:var(--text-dim); font-family:-apple-system,sans-serif; padding:30px 10px; font-size:0.9rem;}
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:18px;}
+  .stat-card{background:var(--surface-2); border-radius:10px; padding:12px 14px; font-family:-apple-system,sans-serif;}
+  .stat-card .n{font-size:1.3rem; font-weight:800;}
+  .stat-card .l{font-size:0.72rem; color:var(--text-dim);}
+  footer.note{text-align:center; color:var(--text-dim); font-size:0.72rem; font-family:-apple-system,sans-serif; margin-top:30px;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="top">
+    <h1>🎓 Oposición Conserje · Ayto. Boadilla del Monte</h1>
+  </div>
+  <p class="subtitle">Temario completo + banco de tests con seguimiento de resultados</p>
+
+  <nav class="tabs">
+    <button data-view="estudiar" class="active">📖 Estudiar</button>
+    <button data-view="test">✍️ Hacer test</button>
+    <button data-view="historial">📊 Historial</button>
+  </nav>
+
+  <section id="view-estudiar" class="view active"></section>
+  <section id="view-test" class="view"></section>
+  <section id="view-historial" class="view"></section>
+
+  <footer class="note">Temario basado en el índice de la convocatoria · 10 temas · 120 preguntas de test · Los resultados se guardan en este navegador</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ======================= estado y utilidades ======================= */
+let db = null;
+const LS_KEY = "boadilla_conserje_attempts_v1";
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function withShuffledOptions(q){
+  const idx = [0,1,2,3];
+  const shuffledIdx = shuffle(idx);
+  const options = shuffledIdx.map(i=>q.options[i]);
+  const correct = shuffledIdx.indexOf(q.correct);
+  return {tema:q.tema, q:q.q, options, correct, exp:q.exp};
+}
+
+/* ======================= navegación por pestañas ======================= */
+document.querySelectorAll("nav.tabs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+    if(btn.dataset.view === "historial") renderHistorial();
+    if(btn.dataset.view === "test") renderTestSetup();
+  });
+});
+
+/* ======================= vista: Estudiar ======================= */
+function renderEstudiar(){
+  const el = document.getElementById("view-estudiar");
+  el.innerHTML = TEMARIO.map(t=>`
+    <div class="card tema-card" data-tema="${t.id}">
+      <div class="tema-head">
+        <div class="tema-num">${t.id}</div>
+        <strong>${t.title}</strong>
+      </div>
+      <div class="tema-body">
+        <div class="toggle-row">
+          <button class="mode-btn active" data-mode="resumen">Resumen</button>
+          <button class="mode-btn" data-mode="desarrollo">Desarrollo</button>
+        </div>
+        <div class="content resumen-content">${t.resumen}</div>
+        <div class="content desarrollo-content" style="display:none">${t.desarrollo}</div>
+      </div>
+    </div>
+  `).join("");
+
+  el.querySelectorAll(".tema-card").forEach(card=>{
+    const head = card.querySelector(".tema-head");
+    head.style.cursor = "pointer";
+    head.addEventListener("click", ()=>{
+      card.classList.toggle("open");
+    });
+    card.querySelectorAll(".mode-btn").forEach(mb=>{
+      mb.addEventListener("click", (ev)=>{
+        ev.stopPropagation();
+        card.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+        mb.classList.add("active");
+        const mode = mb.dataset.mode;
+        card.querySelector(".resumen-content").style.display = mode==="resumen" ? "" : "none";
+        card.querySelector(".desarrollo-content").style.display = mode==="desarrollo" ? "" : "none";
+      });
+    });
+  });
+}
+
+/* ======================= motor de test ======================= */
+let quizState = null; // {questions, current, answers, mode, temaId, temaTitle}
+
+function renderTestSetup(){
+  const el = document.getElementById("view-test");
+  el.innerHTML = `
+    <div class="card quiz-setup">
+      <h2>¿Qué quieres practicar?</h2>
+      <p class="subtitle">Elige un tema concreto (10 preguntas) o pon a prueba todo el temario (20 preguntas)</p>
+      <div class="mode-grid">
+        <div class="mode-card selected" id="mode-tema">
+          <h3>📘 Test por tema</h3>
+          <p>10 preguntas aleatorias del tema que elijas.</p>
+          <select id="tema-select">
+            ${TEMARIO.map(t=>`<option value="${t.id}">Tema ${t.id}. ${t.title.split(":")[0].split(".")[0]}</option>`).join("")}
+          </select>
+        </div>
+        <div class="mode-card" id="mode-general">
+          <h3>🗂️ Test general</h3>
+          <p>20 preguntas: 2 de cada uno de los 10 temas, en orden aleatorio.</p>
+        </div>
+      </div>
+      <button class="btn" id="start-quiz-btn">Empezar test →</button>
+    </div>
+  `;
+  let selectedMode = "tema";
+  const modeTemaCard = el.querySelector("#mode-tema");
+  const modeGeneralCard = el.querySelector("#mode-general");
+  const temaSelect = el.querySelector("#tema-select");
+  modeTemaCard.addEventListener("click", (e)=>{
+    if(e.target.tagName === "SELECT") return;
+    selectedMode = "tema";
+    modeTemaCard.classList.add("selected");
+    modeGeneralCard.classList.remove("selected");
+  });
+  modeGeneralCard.addEventListener("click", ()=>{
+    selectedMode = "general";
+    modeGeneralCard.classList.add("selected");
+    modeTemaCard.classList.remove("selected");
+  });
+  el.querySelector("#start-quiz-btn").addEventListener("click", ()=>{
+    if(selectedMode === "tema"){
+      const temaId = parseInt(temaSelect.value, 10);
+      startQuiz("tema", temaId);
+    } else {
+      startQuiz("general", null);
+    }
+  });
+}
+
+function startQuiz(mode, temaId){
+  let pool;
+  let temaTitle = null;
+  if(mode === "tema"){
+    pool = shuffle(QUESTIONS.filter(q=>q.tema===temaId)).slice(0,10);
+    temaTitle = TEMARIO.find(t=>t.id===temaId).title;
+  } else {
+    pool = [];
+    for(let i=1;i<=10;i++){
+      const qs = shuffle(QUESTIONS.filter(q=>q.tema===i)).slice(0,2);
+      pool = pool.concat(qs);
+    }
+    pool = shuffle(pool);
+  }
+  const questions = pool.map(withShuffledOptions);
+  quizState = {questions, current:0, answers:new Array(questions.length).fill(null), mode, temaId, temaTitle};
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const el = document.getElementById("view-test");
+  const {questions, current, answers} = quizState;
+  const q = questions[current];
+  const answered = answers[current] !== null;
+  const pct = Math.round((current/questions.length)*100);
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="progress-bar"><div style="width:${pct}%"></div></div>
+      <div class="q-meta">
+        <span>Pregunta ${current+1} de ${questions.length}</span>
+        <span>Tema ${q.tema}</span>
+      </div>
+      <p class="q-text">${q.q}</p>
+      <div class="options"></div>
+      <div class="exp-box" id="exp-box"></div>
+      <div class="btn-row" style="margin-top:16px; justify-content:space-between;">
+        <button class="btn secondary" id="quit-btn">Salir del test</button>
+        <button class="btn" id="next-btn" ${answered?"":"disabled"}>${current+1===questions.length ? "Ver resultados" : "Siguiente →"}</button>
+      </div>
+    </div>
+  `;
+
+  const optionsEl = el.querySelector(".options");
+  q.options.forEach((opt,i)=>{
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerHTML = `<div class="letter">${String.fromCharCode(65+i)}</div><div>${opt}</div>`;
+    if(answered) applyOptionState(div, i, q, answers[current]);
+    div.addEventListener("click", ()=>{
+      if(answers[current] !== null) return;
+      answers[current] = i;
+      renderQuestion();
+    });
+    optionsEl.appendChild(div);
+  });
+
+  if(answered){
+    const box = el.querySelector("#exp-box");
+    box.classList.add("show");
+    const wasCorrect = answers[current] === q.correct;
+    box.innerHTML = `<strong>${wasCorrect?"✔ Correcto.":"✘ Incorrecto."}</strong> ${q.exp}`;
+  }
+
+  el.querySelector("#next-btn").addEventListener("click", ()=>{
+    if(current+1 === questions.length){
+      finishQuiz();
+    } else {
+      quizState.current++;
+      renderQuestion();
+    }
+  });
+  el.querySelector("#quit-btn").addEventListener("click", ()=>{
+    quizState = null;
+    renderTestSetup();
+  });
+}
+
+function applyOptionState(div, i, q, given){
+  if(i === q.correct){
+    div.classList.add("correct");
+  } else if(i === given){
+    div.classList.add("incorrect");
+  }
+}
+
+function finishQuiz(){
+  const {questions, answers, mode, temaId, temaTitle} = quizState;
+  let correctCount = 0;
+  const perTema = {};
+  questions.forEach((q,i)=>{
+    const ok = answers[i] === q.correct;
+    if(ok) correctCount++;
+    perTema[q.tema] = perTema[q.tema] || {correct:0,total:0};
+    perTema[q.tema].total++;
+    if(ok) perTema[q.tema].correct++;
+  });
+  const total = questions.length;
+  const scorePct = Math.round((correctCount/total)*100);
+
+  const attempt = {
+    date: new Date().toISOString(),
+    mode,
+    temaId: temaId || null,
+    temaTitle: temaTitle || null,
+    total,
+    correct: correctCount,
+    scorePct,
+    perTema
+  };
+  saveAttempt(attempt);
+  renderResults(attempt, questions, answers);
+}
+
+function renderResults(attempt, questions, answers){
+  const el = document.getElementById("view-test");
+  const scoreColor = attempt.scorePct>=70 ? "var(--good)" : attempt.scorePct>=50 ? "#c58a1f" : "var(--bad)";
+  const reviewHtml = questions.map((q,i)=>{
+    const ok = answers[i] === q.correct;
+    return `
+      <div class="review-item ${ok?"ok":"bad"}">
+        <span class="tag">${ok?"CORRECTA":"FALLADA"} · Tema ${q.tema}</span>
+        <p class="q-text" style="font-size:0.92rem; margin:4px 0 8px;">${q.q}</p>
+        <div style="font-size:0.85rem; font-family:-apple-system,sans-serif; color:var(--text-dim);">
+          Tu respuesta: <strong style="color:var(--text)">${q.options[answers[i]] ?? "—"}</strong><br>
+          ${!ok ? `Respuesta correcta: <strong style="color:var(--good)">${q.options[q.correct]}</strong><br>` : ""}
+          <span>${q.exp}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="card result-score">
+      <div class="lbl">${attempt.mode==="tema" ? "Test de tema: "+attempt.temaTitle : "Test general (todo el temario)"}</div>
+      <div class="big" style="color:${scoreColor}">${attempt.correct}/${attempt.total}</div>
+      <div class="lbl">${attempt.scorePct}% de aciertos · guardado en tu historial</div>
+      <div class="btn-row" style="justify-content:center; margin-top:16px;">
+        <button class="btn secondary" id="back-setup-btn">Volver a elegir test</button>
+        <button class="btn" id="retry-btn">Repetir este tipo de test</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Revisión de preguntas</h3>
+      ${reviewHtml}
+    </div>
+  `;
+  el.querySelector("#back-setup-btn").addEventListener("click", ()=>{ quizState=null; renderTestSetup(); });
+  el.querySelector("#retry-btn").addEventListener("click", ()=>{
+    startQuiz(attempt.mode, attempt.temaId);
+  });
+}
+
+/* ======================= almacenamiento de resultados (localStorage) ======================= */
+function loadLocalAttempts(){
+  try{
+    return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+  }catch(e){ return []; }
+}
+function saveLocalAttempts(list){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(list)); }catch(e){}
+}
+
+async function saveAttempt(attempt){
+  const list = loadLocalAttempts();
+  list.push(attempt);
+  saveLocalAttempts(list);
+}
+
+async function loadAllAttempts(){
+  return loadLocalAttempts().slice().sort((a,b)=> (a.date<b.date?1:-1));
+}
+
+/* ======================= vista: Historial ======================= */
+async function renderHistorial(){
+  const el = document.getElementById("view-historial");
+  el.innerHTML = `<div class="card"><p class="subtitle">Cargando historial…</p></div>`;
+  const attempts = await loadAllAttempts();
+
+  if(attempts.length === 0){
+    el.innerHTML = `<div class="card"><div class="empty-msg">Todavía no has hecho ningún test.<br>Ve a la pestaña "Hacer test" para empezar a practicar.</div></div>`;
+    return;
+  }
+
+  const totalTests = attempts.length;
+  const avgScore = Math.round(attempts.reduce((s,a)=>s+a.scorePct,0)/totalTests);
+  const last5 = attempts.slice(0,5);
+  const last5Avg = Math.round(last5.reduce((s,a)=>s+a.scorePct,0)/last5.length);
+
+  const perTemaAgg = {};
+  attempts.forEach(a=>{
+    if(a.perTema){
+      Object.keys(a.perTema).forEach(tid=>{
+        perTemaAgg[tid] = perTemaAgg[tid] || {correct:0,total:0};
+        perTemaAgg[tid].correct += a.perTema[tid].correct;
+        perTemaAgg[tid].total += a.perTema[tid].total;
+      });
+    }
+  });
+
+  const temaRows = TEMARIO.map(t=>{
+    const agg = perTemaAgg[t.id];
+    if(!agg || agg.total===0) return {id:t.id, title:t.title, pct:null};
+    return {id:t.id, title:t.title, pct: Math.round((agg.correct/agg.total)*100)};
+  }).sort((a,b)=> (a.pct===null?-1:a.pct) - (b.pct===null?-1:b.pct));
+
+  function pillClass(pct){
+    if(pct===null) return "";
+    if(pct>=70) return "good";
+    if(pct>=50) return "mid";
+    return "bad";
+  }
+
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="n">${totalTests}</div><div class="l">Tests realizados</div></div>
+      <div class="stat-card"><div class="n">${avgScore}%</div><div class="l">Media histórica</div></div>
+      <div class="stat-card"><div class="n">${last5Avg}%</div><div class="l">Media últimos 5</div></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Rendimiento por tema</h3>
+      <table class="hist">
+        <tbody>
+          ${temaRows.map(r=>`
+            <tr>
+              <td style="width:60%">Tema ${r.id}. ${r.title.split(":")[0].split(".")[0]}</td>
+              <td>${r.pct===null ? `<span class="pill" style="background:var(--surface-2); color:var(--text-dim)">sin datos</span>` : `<span class="pill ${pillClass(r.pct)}">${r.pct}%</span>`}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Últimos resultados</h3>
+      <table class="hist">
+        <thead><tr><th>Fecha</th><th>Test</th><th>Resultado</th></tr></thead>
+        <tbody>
+          ${attempts.slice(0,30).map(a=>`
+            <tr>
+              <td>${new Date(a.date).toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}</td>
+              <td>${a.mode==="tema" ? "Tema "+a.temaId : "General"}</td>
+              <td><span class="pill ${pillClass(a.scorePct)}">${a.correct}/${a.total} · ${a.scorePct}%</span></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ======================= inicio ======================= */
+renderEstudiar();
+</script>
+</body>
+</html>
