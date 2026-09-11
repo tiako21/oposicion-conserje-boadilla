@@ -28,7 +28,6 @@
     color-scheme: dark;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0; padding:0;}
   body{background:var(--bg); color:var(--text); font-family: "Iowan Old Style","Georgia",serif;}
   #app{max-width:880px; margin:0 auto; padding:20px 16px 64px;}
   h1,h2,h3,h4{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight:700; line-height:1.25;}
@@ -114,6 +113,35 @@
   .stat-card .n{font-size:1.3rem; font-weight:800;}
   .stat-card .l{font-size:0.72rem; color:var(--text-dim);}
   footer.note{text-align:center; color:var(--text-dim); font-size:0.72rem; font-family:-apple-system,sans-serif; margin-top:30px;}
+
+  /* estudio: layout de navegación + contenido */
+  .study-layout{display:flex; gap:20px; align-items:flex-start;}
+  .tema-nav{flex:0 0 230px; display:flex; flex-direction:column; gap:4px; position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; padding-right:4px;}
+  .tema-nav-item{display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid transparent; background:transparent; text-align:left; font:600 0.8rem/1.3 -apple-system,sans-serif; color:var(--text-dim);}
+  .tema-nav-item:hover{background:var(--surface-2);}
+  .tema-nav-item.active{background:var(--surface); border-color:var(--border); color:var(--accent); box-shadow:var(--shadow);}
+  .tema-nav-item .n{flex:0 0 auto; width:22px; height:22px; border-radius:7px; background:var(--surface-2); color:inherit; font-weight:800; font-size:0.72rem; display:flex; align-items:center; justify-content:center;}
+  .tema-nav-item.active .n{background:var(--accent); color:#fff;}
+  .study-content{flex:1; min-width:0;}
+  .study-header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .study-header h2{font-size:1.15rem; margin:0; max-width:560px;}
+  .study-nav-btns{display:flex; gap:8px;}
+  .study-nav-btns button{border:1px solid var(--border); background:var(--surface); color:var(--text-dim); width:34px; height:34px; border-radius:9px; cursor:pointer; font-size:0.9rem;}
+  .study-nav-btns button:disabled{opacity:.35; cursor:not-allowed;}
+  .toc-box{margin:0 0 18px; padding:12px 14px; background:var(--surface-2); border-radius:12px;}
+  .toc-box .toc-label{font:700 0.68rem/1 -apple-system,sans-serif; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); margin-bottom:8px; display:block;}
+  .toc-pills{display:flex; flex-wrap:wrap; gap:6px;}
+  .toc-pills button{font:600 0.74rem/1.2 -apple-system,sans-serif; color:var(--accent); background:var(--surface); border:1px solid var(--border); padding:6px 11px; border-radius:999px; cursor:pointer; text-align:left;}
+  .toc-pills button:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+  select.tema-select-mobile{display:none; width:100%; margin-bottom:14px;}
+  @media (max-width:760px){
+    .study-layout{flex-direction:column;}
+    .tema-nav{display:none;}
+    select.tema-select-mobile{display:block;}
+  }
+  .back-to-top{position:fixed; bottom:20px; right:20px; width:46px; height:46px; border-radius:50%; background:var(--accent); color:#fff; border:none; box-shadow:var(--shadow); font-size:1.15rem; cursor:pointer; align-items:center; justify-content:center; z-index:80; display:none;}
+  .back-to-top.show{display:flex;}
+  .back-to-top:hover{background:var(--accent-2);}
 </style>
 </head>
 <body>
@@ -134,13 +162,16 @@
   <section id="view-test" class="view"></section>
   <section id="view-historial" class="view"></section>
 
-  <footer class="note">Temario basado en el índice de la convocatoria · 10 temas · 120 preguntas de test · Los resultados se guardan en este navegador</footer>
+  <footer class="note" id="footer-note">Temario basado en el índice de la convocatoria · 10 temas</footer>
 </div>
+
+<button class="back-to-top" id="back-to-top" title="Volver arriba" aria-label="Volver arriba">↑</button>
 
 <script src="data.js"></script>
 <script>
 /* ======================= estado y utilidades ======================= */
 let db = null;
+let DB_READY = false;
 const LS_KEY = "boadilla_conserje_attempts_v1";
 
 function shuffle(arr){
@@ -173,42 +204,115 @@ document.querySelectorAll("nav.tabs button").forEach(btn=>{
 });
 
 /* ======================= vista: Estudiar ======================= */
+const studyState = { temaId: 1, mode: "resumen" };
+
+function shortTitle(t){
+  return t.title.split(":")[0].split(".")[0];
+}
+
 function renderEstudiar(){
   const el = document.getElementById("view-estudiar");
-  el.innerHTML = TEMARIO.map(t=>`
-    <div class="card tema-card" data-tema="${t.id}">
-      <div class="tema-head">
-        <div class="tema-num">${t.id}</div>
-        <strong>${t.title}</strong>
-      </div>
-      <div class="tema-body">
-        <div class="toggle-row">
-          <button class="mode-btn active" data-mode="resumen">Resumen</button>
-          <button class="mode-btn" data-mode="desarrollo">Desarrollo</button>
+  el.innerHTML = `
+    <div class="study-layout">
+      <aside class="tema-nav" id="tema-nav">
+        ${TEMARIO.map(t=>`
+          <button class="tema-nav-item" data-tema="${t.id}">
+            <span class="n">${t.id}</span><span>${shortTitle(t)}</span>
+          </button>
+        `).join("")}
+      </aside>
+      <div class="study-content">
+        <select class="tema-select-mobile" id="tema-select-mobile">
+          ${TEMARIO.map(t=>`<option value="${t.id}">Tema ${t.id}. ${shortTitle(t)}</option>`).join("")}
+        </select>
+        <div class="card">
+          <div class="study-header">
+            <h2 id="study-title"></h2>
+            <div class="study-nav-btns">
+              <button id="prev-tema-btn" title="Tema anterior">←</button>
+              <button id="next-tema-btn" title="Tema siguiente">→</button>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <button class="mode-btn" data-mode="resumen">Resumen</button>
+            <button class="mode-btn" data-mode="desarrollo">Desarrollo</button>
+          </div>
+          <div class="toc-box" id="toc-box" style="display:none">
+            <span class="toc-label">Ir a la sección</span>
+            <div class="toc-pills" id="toc-pills"></div>
+          </div>
+          <div class="content" id="study-body"></div>
         </div>
-        <div class="content resumen-content">${t.resumen}</div>
-        <div class="content desarrollo-content" style="display:none">${t.desarrollo}</div>
       </div>
     </div>
-  `).join("");
+  `;
 
-  el.querySelectorAll(".tema-card").forEach(card=>{
-    const head = card.querySelector(".tema-head");
-    head.style.cursor = "pointer";
-    head.addEventListener("click", ()=>{
-      card.classList.toggle("open");
-    });
-    card.querySelectorAll(".mode-btn").forEach(mb=>{
-      mb.addEventListener("click", (ev)=>{
-        ev.stopPropagation();
-        card.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
-        mb.classList.add("active");
-        const mode = mb.dataset.mode;
-        card.querySelector(".resumen-content").style.display = mode==="resumen" ? "" : "none";
-        card.querySelector(".desarrollo-content").style.display = mode==="desarrollo" ? "" : "none";
-      });
+  el.querySelectorAll(".tema-nav-item").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      studyState.temaId = parseInt(btn.dataset.tema, 10);
+      renderStudyContent();
     });
   });
+  el.querySelector("#tema-select-mobile").addEventListener("change", (e)=>{
+    studyState.temaId = parseInt(e.target.value, 10);
+    renderStudyContent();
+  });
+  el.querySelectorAll(".mode-btn").forEach(mb=>{
+    mb.addEventListener("click", ()=>{
+      studyState.mode = mb.dataset.mode;
+      renderStudyContent();
+    });
+  });
+  el.querySelector("#prev-tema-btn").addEventListener("click", ()=>{
+    if(studyState.temaId > 1){ studyState.temaId--; renderStudyContent(); }
+  });
+  el.querySelector("#next-tema-btn").addEventListener("click", ()=>{
+    if(studyState.temaId < TEMARIO.length){ studyState.temaId++; renderStudyContent(); }
+  });
+
+  renderStudyContent();
+}
+
+function renderStudyContent(){
+  const t = TEMARIO.find(x=>x.id===studyState.temaId);
+  const el = document.getElementById("view-estudiar");
+  if(!el || !t) return;
+
+  el.querySelectorAll(".tema-nav-item").forEach(b=>{
+    b.classList.toggle("active", parseInt(b.dataset.tema,10) === t.id);
+  });
+  el.querySelector("#tema-select-mobile").value = String(t.id);
+  el.querySelectorAll(".mode-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode === studyState.mode);
+  });
+  el.querySelector("#prev-tema-btn").disabled = t.id === 1;
+  el.querySelector("#next-tema-btn").disabled = t.id === TEMARIO.length;
+  el.querySelector("#study-title").textContent = `Tema ${t.id}. ${t.title}`;
+
+  const body = el.querySelector("#study-body");
+  body.innerHTML = studyState.mode === "resumen" ? t.resumen : t.desarrollo;
+
+  // construir mini-índice a partir de los <h4> del contenido actual
+  const headings = body.querySelectorAll("h4");
+  const tocBox = el.querySelector("#toc-box");
+  const tocPills = el.querySelector("#toc-pills");
+  if(headings.length > 1){
+    tocBox.style.display = "";
+    tocPills.innerHTML = "";
+    headings.forEach((h,i)=>{
+      h.id = `h-${t.id}-${studyState.mode}-${i}`;
+      const btn = document.createElement("button");
+      btn.textContent = h.textContent;
+      btn.addEventListener("click", ()=>{
+        h.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+      tocPills.appendChild(btn);
+    });
+  } else {
+    tocBox.style.display = "none";
+  }
+
+  window.scrollTo({top:0, behavior:"auto"});
 }
 
 /* ======================= motor de test ======================= */
@@ -414,7 +518,7 @@ function renderResults(attempt, questions, answers){
   });
 }
 
-/* ======================= almacenamiento de resultados (localStorage) ======================= */
+/* ======================= almacenamiento de resultados ======================= */
 function loadLocalAttempts(){
   try{
     return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
@@ -425,12 +529,28 @@ function saveLocalAttempts(list){
 }
 
 async function saveAttempt(attempt){
+  if(db){
+    try{
+      await db.collection("attempts").add(attempt);
+      return;
+    }catch(e){
+      console.error("db save failed, falling back to localStorage", e);
+    }
+  }
   const list = loadLocalAttempts();
   list.push(attempt);
   saveLocalAttempts(list);
 }
 
 async function loadAllAttempts(){
+  if(db){
+    try{
+      const snap = await db.collection("attempts").orderBy("date","desc").limit(500).get();
+      return snap.docs.map(d=>d.data());
+    }catch(e){
+      console.error("db read failed, falling back to localStorage", e);
+    }
+  }
   return loadLocalAttempts().slice().sort((a,b)=> (a.date<b.date?1:-1));
 }
 
@@ -511,8 +631,30 @@ async function renderHistorial(){
   `;
 }
 
+/* ======================= botón volver arriba ======================= */
+const backToTopBtn = document.getElementById("back-to-top");
+window.addEventListener("scroll", ()=>{
+  backToTopBtn.classList.toggle("show", window.scrollY > 400);
+});
+backToTopBtn.addEventListener("click", ()=>{
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
 /* ======================= inicio ======================= */
-renderEstudiar();
+(async function init(){
+  const totalQ = QUESTIONS.length;
+  document.getElementById("footer-note").textContent =
+    `Temario basado en el índice de la convocatoria · 10 temas · ${totalQ} preguntas de test`;
+  renderEstudiar();
+  try{
+    if(window.claude && typeof window.claude.use === "function"){
+      db = await window.claude.use("db");
+    }
+  }catch(e){
+    db = null;
+  }
+})();
 </script>
+
 </body>
 </html>
